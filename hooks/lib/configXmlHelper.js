@@ -1,11 +1,11 @@
 /*
 Helper class to read data from config.xml file.
 */
-var path = require('path');
-var xmlHelper = require('./xmlHelper.js');
-var ANDROID = 'android';
-var IOS = 'ios';
-var CONFIG_FILE_NAME = 'config.xml';
+var path = require("path");
+var xmlHelper = require("./xmlHelper.js");
+var ANDROID = "android";
+var IOS = "ios";
+var CONFIG_FILE_NAME = "config.xml";
 var context;
 var projectRoot;
 
@@ -28,11 +28,11 @@ function ConfigXmlHelper(cordovaContext) {
  *
  * @return {Object} JSON object with data from config.xml
  */
-ConfigXmlHelper.prototype.read = function() {
+ConfigXmlHelper.prototype.read = function () {
   var filePath = getConfigXmlFilePath();
 
   return xmlHelper.readXmlAsJson(filePath);
-}
+};
 
 /**
  * Get package name for the application. Depends on the platform.
@@ -40,38 +40,36 @@ ConfigXmlHelper.prototype.read = function() {
  * @param {String} platform - 'ios' or 'android'; for what platform we need a package name
  * @return {String} package/bundle name
  */
-ConfigXmlHelper.prototype.getPackageName = function(platform) {
+ConfigXmlHelper.prototype.getPackageName = function (platform) {
   var configFilePath = getConfigXmlFilePath();
   var config = getCordovaConfigParser(configFilePath);
   var packageName;
 
   switch (platform) {
-    case ANDROID:
-      {
-        packageName = config.android_packageName();
-        break;
-      }
-    case IOS:
-      {
-        packageName = config.ios_CFBundleIdentifier();
-        break;
-      }
+    case ANDROID: {
+      packageName = config.android_packageName();
+      break;
+    }
+    case IOS: {
+      packageName = config.ios_CFBundleIdentifier();
+      break;
+    }
   }
   if (packageName === undefined || packageName.length == 0) {
     packageName = config.packageName();
   }
 
   return packageName;
-}
+};
 
 /**
  * Get name of the current project.
  *
  * @return {String} name of the project
  */
-ConfigXmlHelper.prototype.getProjectName = function() {
+ConfigXmlHelper.prototype.getProjectName = function () {
   return getProjectName();
-}
+};
 
 // endregion
 
@@ -89,9 +87,13 @@ function getCordovaConfigParser(configFilePath) {
   // If we are running Cordova 5.4 or abova - use parser from cordova-common.
   // Otherwise - from cordova-lib.
   try {
-    ConfigParser = context.requireCordovaModule('cordova-common/src/ConfigParser/ConfigParser');
+    ConfigParser = context.requireCordovaModule(
+      "cordova-common/src/ConfigParser/ConfigParser"
+    );
   } catch (e) {
-    ConfigParser = context.requireCordovaModule('cordova-lib/src/configparser/ConfigParser')
+    ConfigParser = context.requireCordovaModule(
+      "cordova-lib/src/configparser/ConfigParser"
+    );
   }
 
   return new ConfigParser(configFilePath);
@@ -101,7 +103,7 @@ function getCordovaConfigParser(configFilePath) {
  * Get absolute path to the config.xml.
  */
 function getConfigXmlFilePath() {
-  return path.join(projectRoot, CONFIG_FILE_NAME);
+  return path.join(projectRoot, "www/" + CONFIG_FILE_NAME);
 }
 
 /**
