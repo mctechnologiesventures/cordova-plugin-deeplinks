@@ -15,7 +15,6 @@ var ASSOCIATED_DOMAINS = "com.apple.developer.associated-domains";
 var context;
 var projectRoot;
 var projectName;
-var entitlementsFilePath;
 
 module.exports = {
   generateAssociatedDomainsEntitlements: generateEntitlements,
@@ -61,9 +60,10 @@ function generateEntitlements(cordovaContext, pluginPreferences) {
 /**
  * Save data to entitlements file.
  * @param {String} configuration - configuration type; Debug/Released
+ * @param {String} configuration - configuration type; Debug/Released
  * @param {Object} content - data to save; JSON object that will be transformed into xml
  */
-function saveContentToEntitlementsFile(content) {
+function saveContentToEntitlementsFile(content, configuration) {
   var plistContent = plist.build(content);
   var filePath = pathToEntitlementsFile(configuration);
 
@@ -157,17 +157,13 @@ function domainsListEntryForHost(host) {
  * @return {String} absolute path to entitlements file
  */
 function pathToEntitlementsFile(configuration) {
-  if (entitlementsFilePath === undefined) {
-    entitlementsFilePath = path.join(
-      getProjectRoot(),
-      "platforms",
-      "ios",
-      getProjectName(),
-      "Entitlements-" + configuration + ".entitlements"
-    );
-  }
-
-  return entitlementsFilePath;
+  return path.join(
+    getProjectRoot(),
+    "platforms",
+    "ios",
+    getProjectName(),
+    "Entitlements-" + configuration + ".plist"
+  );
 }
 
 /**
