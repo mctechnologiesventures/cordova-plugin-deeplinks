@@ -29,9 +29,10 @@ module.exports = {
  * @param {Object} pluginPreferences - plugin preferences from config.xml; already parsed
  * @param {String} configuration - configuration type; Debug/Released
  */
-function generateEntitlements(pluginPreferences, configuration) {
-  context = cordovaContext;
-
+function generateEntitlementsForConfiguration(
+  pluginPreferences,
+  configuration
+) {
   var currentEntitlements = getEntitlementsFileContent(configuration);
   var newEntitlements = injectPreferences(
     currentEntitlements,
@@ -49,14 +50,8 @@ function generateEntitlements(pluginPreferences, configuration) {
  */
 function generateEntitlements(cordovaContext, pluginPreferences) {
   context = cordovaContext;
-
-  var currentDebEntitlements = getEntitlementsFileContent("Debug");
-  var newEntitlements = injectPreferences(
-    currentEntitlements,
-    pluginPreferences
-  );
-
-  saveContentToEntitlementsFile(newEntitlements);
+  generateEntitlementsForConfiguration(pluginPreferences, "Debug");
+  generateEntitlementsForConfiguration(pluginPreferences, "Release");
 }
 
 // endregion
