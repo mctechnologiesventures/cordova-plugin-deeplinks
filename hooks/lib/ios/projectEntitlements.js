@@ -6,22 +6,40 @@ Location: ProjectName/
 Script only generates content. File it self is included in the xcode project in another hook: xcodePreferences.js.
 */
 
-var path = require('path');
-var fs = require('fs');
-var plist = require('plist');
-var mkpath = require('mkpath');
-var ConfigXmlHelper = require('../configXmlHelper.js');
-var ASSOCIATED_DOMAINS = 'com.apple.developer.associated-domains';
+var path = require("path");
+var fs = require("fs");
+var plist = require("plist");
+var mkpath = require("mkpath");
+var ConfigXmlHelper = require("../configXmlHelper.js");
+var ASSOCIATED_DOMAINS = "com.apple.developer.associated-domains";
 var context;
 var projectRoot;
 var projectName;
 var entitlementsFilePath;
 
 module.exports = {
-  generateAssociatedDomainsEntitlements: generateEntitlements
+  generateAssociatedDomainsEntitlements: generateEntitlements,
 };
 
 // region Public API
+
+/**
+ * Generate entitlements file content.
+ *
+ * @param {Object} pluginPreferences - plugin preferences from config.xml; already parsed
+ * @param {String} configuration - configuration type; Debug/Released
+ */
+function generateEntitlements(pluginPreferences, configuration) {
+  context = cordovaContext;
+
+  var currentDebEntitlements = getEntitlementsFileContent(configuration);
+  var newEntitlements = injectPreferences(
+    currentEntitlements,
+    pluginPreferences
+  );
+
+  saveContentToEntitlementsFile(newEntitlements, configuration);
+}
 
 /**
  * Generate entitlements file content.
@@ -32,8 +50,11 @@ module.exports = {
 function generateEntitlements(cordovaContext, pluginPreferences) {
   context = cordovaContext;
 
-  var currentEntitlements = getEntitlementsFileContent();
-  var newEntitlements = injectPreferences(currentEntitlements, pluginPreferences);
+  var currentDebEntitlements = getEntitlementsFileContent("Debug");
+  var newEntitlements = injectPreferences(
+    currentEntitlements,
+    pluginPreferences
+  );
 
   saveContentToEntitlementsFile(newEntitlements);
 }
@@ -44,31 +65,31 @@ function generateEntitlements(cordovaContext, pluginPreferences) {
 
 /**
  * Save data to entitlements file.
- *
+ * @param {String} configuration - configuration type; Debug/Released
  * @param {Object} content - data to save; JSON object that will be transformed into xml
  */
 function saveContentToEntitlementsFile(content) {
   var plistContent = plist.build(content);
-  var filePath = pathToEntitlementsFile();
+  var filePath = pathToEntitlementsFile(configuration);
 
   // ensure that file exists
   mkpath.sync(path.dirname(filePath));
 
   // save it's content
-  fs.writeFileSync(filePath, plistContent, 'utf8');
+  fs.writeFileSync(filePath, plistContent, "utf8");
 }
 
 /**
  * Read data from existing entitlements file. If none exist - default value is returned
- *
+ * @param {String} configuration - configuration type; Debug/Released
  * @return {String} entitlements file content
  */
-function getEntitlementsFileContent() {
-  var pathToFile = pathToEntitlementsFile();
+function getEntitlementsFileContent(configuration) {
+  var pathToFile = pathToEntitlementsFile(configuration);
   var content;
 
   try {
-    content = fs.readFileSync(pathToFile, 'utf8');
+    content = fs.readFileSync(pathToFile, "utf8");
   } catch (err) {
     return defaultEntitlementsFile();
   }
@@ -111,7 +132,7 @@ function generateAssociatedDomainsContent(pluginPreferences) {
   var domainsList = [];
 
   // generate list of host links
-  pluginPreferences.hosts.forEach(function(host) {
+  pluginPreferences.hosts.forEach(function (host) {
     var link = domainsListEntryForHost(host);
     if (domainsList.indexOf(link) == -1) {
       domainsList.push(link);
@@ -128,7 +149,7 @@ function generateAssociatedDomainsContent(pluginPreferences) {
  * @return {String} record
  */
 function domainsListEntryForHost(host) {
-  return 'applinks:' + host.name;
+  return "applinks:" + host.name;
 }
 
 // endregion
@@ -137,12 +158,18 @@ function domainsListEntryForHost(host) {
 
 /**
  * Path to entitlements file.
- *
+ * @param {String} configuration - configuration type; Debug/Released
  * @return {String} absolute path to entitlements file
  */
-function pathToEntitlementsFile() {
+function pathToEntitlementsFile(configuration) {
   if (entitlementsFilePath === undefined) {
-    entitlementsFilePath = path.join(getProjectRoot(), 'platforms', 'ios', getProjectName(), 'Resources', getProjectName() + '.entitlements');
+    entitlementsFilePath = path.join(
+      getProjectRoot(),
+      "platforms",
+      "ios",
+      getProjectName(),
+      "Entitlements-" + configuration + ".entitlements"
+    );
   }
 
   return entitlementsFilePath;
