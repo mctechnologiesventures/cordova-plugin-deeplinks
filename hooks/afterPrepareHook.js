@@ -75,12 +75,6 @@ function activateUniversalLinksInAndroid(cordovaContext, pluginPreferences) {
  * @param {Object} pluginPreferences - plugin preferences from the config.xml file. Basically, content from <universal-links> tag.
  */
 function activateUniversalLinksInIos(cordovaContext, pluginPreferences) {
-  // generate entitlements file
-  iosProjectEntitlements.generateAssociatedDomainsEntitlements(
-    cordovaContext,
-    pluginPreferences
-  );
-
   // generate apple-site-association-file
   iosAppSiteAssociationFile.generate(cordovaContext, pluginPreferences);
 }
